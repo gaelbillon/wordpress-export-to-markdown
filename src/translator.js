@@ -55,6 +55,9 @@ function initTurndownService() {
 
 function getPostContent(post, turndownService, config) {
 	let content = post.encoded[0];
+	// console.log(post);
+	// console.log(post.postmeta);
+	// console.log(post.category);
 
 	// insert an empty div element between double line breaks
 	// this nifty trick causes turndown to keep adjacent paragraphs separated
@@ -64,7 +67,9 @@ function getPostContent(post, turndownService, config) {
 	if (config.saveScrapedImages) {
 		// writeImageFile() will save all content images to a relative /images
         // folder so update references in post content to match
-		content = content.replace(/(<img[^>]*src=").*?([^/"]+\.(?:gif|jpe?g|png))("[^>]*>)/gi, '$1images/$2$3');
+        const date = post.post_date[0].substring(0,10);         
+        const imageFolderName = "/media/" + date + "---" + post.post_name; //   ../../static		
+		content = content.replace(/(<img[^>]*src=").*?([^/"]+\.(?:gif|jpe?g|png))("[^>]*>)/gi, '$1' + imageFolderName + '/$2$3');
 	}
 
 	// this is a hack to make <iframe> nodes non-empty by inserting a "." which
@@ -80,6 +85,15 @@ function getPostContent(post, turndownService, config) {
 
 	// clean up the "." from the iframe hack above
 	content = content.replace(/\.(<\/iframe>)/gi, '$1');
+
+	// Replace internal links
+	content = content.replace(/(http|https):\/\/(dev\.)?gaelbillon\.com\/(.*)\//gi, '/posts/$3/');
+	// https://dev.gaelbillon.com/cms-headless-avantages-inconvenients-comparatif-des-5-leaders/
+	// http://gaelbillon.com/debugger-facilement-des-applications-sites-mobiles/
+	// https://dev.gaelbillon.com
+	// http://dev.gaelbillon.com
+	// https://gaelbillon.com
+	// http://gaelbillon.com
 
 	return content;
 }

@@ -54,7 +54,7 @@ const options = [
 		aliases: ['prefixdate'],
 		type: 'boolean',
 		description: 'Prefix post folders/files with date',
-		default: false
+		default: true
 	},
 	{
 		name: 'save-attached-images',

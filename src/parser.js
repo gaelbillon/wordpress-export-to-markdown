@@ -36,7 +36,7 @@ function collectPosts(data, config) {
 	// this is passed into getPostContent() for the markdown conversion
 	const turndownService = translator.initTurndownService();
 
-	const posts = getItemsOfType(data, 'post')
+	const posts = getItemsOfType(data, 'portfolio')
 		.filter(post => post.status[0] !== 'trash' && post.status[0] !== 'draft')
 		.map(post => ({
 			// meta data isn't written to file, but is used to help with other things
@@ -44,11 +44,21 @@ function collectPosts(data, config) {
 				id: getPostId(post),
 				slug: getPostSlug(post),
 				coverImageId: getPostCoverImageId(post),
-				imageUrls: []
+				imageUrls: [],
+				date: getPostDate(post)
 			},
 			frontmatter: {
+				posttype: "work",
+				draft: "false",
+				path: "/" + getPostSlug(post),
 				title: getPostTitle(post),
-				date: getPostDate(post)
+				subtitle: "",
+				date: getPostDate(post),
+				category: getPostCategory(post),
+				tags: getPostTags(post),
+				intro: getPostMetaDescription(post),
+				color: "#125E8A",
+				url: "htttp://gaelbillon.com/"
 			},
 			content: translator.getPostContent(post, turndownService, config)
 		}));
@@ -58,11 +68,147 @@ function collectPosts(data, config) {
 }
 
 function getPostId(post) {
+	// console.log(post.category);
 	return post.post_id[0];
 }
 
 function getPostSlug(post) {
 	return post.post_name[0];
+}
+
+function getPostTags(post) {
+	// return post.category[0];
+	// return '  - "Design"\n  - "Typography"\n  - "Web Development"';
+	// return "  - Tomato'\n  - 'Typography'\n  - 'Web Development'";
+
+	const categories = post.category;
+	// console.log(post.category[0])
+	
+	// console.log("- - - - - - - -");
+	
+	const tags = [];
+
+	for (const property in categories) {
+	  // console.log(`${property}: ${tags[property]}`);
+	  // console.log("-");
+	  // console.log(`${property}`);
+	  // console.log(`${categories[property]}`);
+	  // console.log("-");
+	  // console.log(property);
+	  // console.log(categories[property]);
+	  // console.log(categories[property]);
+	  // console.log("-");
+	  // console.log(categories[property]['_']);
+	  
+	  const tag = categories[property]['_'];
+	  const tagListItem = '\n  - ' + '"' + tag + '"'; 
+	  
+	  tags.push(tagListItem);
+	  
+	  // console.log("~~~~");
+	  // console.log(`${property['_']}: ${tags[property]['_:']}`);
+	  // console.log(`${property[0]}: ${tags[property][0]}`);
+	}
+	// console.log("tags : " + tags);
+	// console.log("tags : " + tags.toString());
+
+	// const testString = '  - "Tomato"\n\t- "Typography"\n\t- "Web Development" ';
+	// console.log("testString : " + testString);
+	
+	// console.log("===============")
+
+	// return testString;
+	// console.log(tags);
+	return tags.toString();
+}
+
+function getPostCategory(post) {
+	// return post.category[0];
+	// return '  - "Design"\n  - "Typography"\n  - "Web Development"';
+	// return "  - Tomato'\n  - 'Typography'\n  - 'Web Development'";
+
+	const categories = post.category;
+	// console.log(post.category[0])
+	
+	// console.log("- - - - - - - -");
+	
+	// const tags = null;
+
+	for (const property in categories) {
+	  // console.log(`${property}: ${tags[property]}`);
+	  // console.log("-");
+	  // console.log(`${property}`);
+	  // console.log(`${categories[property]}`);
+	  // console.log("-");
+	  // console.log(property);
+	  // console.log(categories[property]);
+	  // console.log(categories[property]);
+	  // console.log("-");
+	  // console.log(categories[property]['_']);
+	  
+	  // const tag = categories[property]['_'];
+	  // const tagListItem = '\n  - ' + '"' + tag + '"'; 
+	  
+	  // console.log(categories[property]);
+	  // console.log(categories[property]['$']);
+	  // console.log(categories[property]['$']['domain']);
+
+	  if ( categories[property]['$']['domain'] ==='category' ) {
+		// console.log(categories[property]['_']);
+		return categories[property]['_'];
+	  }
+
+	  // console.log("----------------");
+	  // tags.push(tagListItem);
+	  
+	  // console.log("~~~~");
+	  // console.log(`${property['_']}: ${tags[property]['_:']}`);
+	  // console.log(`${property[0]}: ${tags[property][0]}`);
+	}
+	// console.log("tags : " + tags);
+	// console.log("tags : " + tags.toString());
+
+	// const testString = '  - "Tomato"\n\t- "Typography"\n\t- "Web Development" ';
+	// console.log("testString : " + testString);
+	
+	// console.log("===============")
+
+	// return testString;
+	// console.log(tags);
+	// return tags.toString();
+	// return "";
+}
+
+function getPostMetaDescription(post) {
+	// console.log(post.postmeta[0].meta_value);
+	// console.log(post.postmeta);
+	var metaDescription = null;
+
+	const postmeta = post.postmeta;
+	
+	for (const property in postmeta) {
+		// const meta = postmeta[property]['_yoast_wpseo_metadesc'];
+		// console.log(meta);
+
+		// console.log("--------")
+		// console.log(property);
+		// console.log(postmeta[property]['meta_key']);
+		// console.log(postmeta[property]['meta_key'][0]);
+		// console.log(postmeta[property]['meta_value'][0]);
+		// console.log("--------")
+
+		if (postmeta[property]['meta_key'][0] === "_yoast_wpseo_metadesc") {
+			metaDescription = postmeta[property]['meta_value'][0];
+		// 	console.log("metaDescription : " + metaDescription);
+			return metaDescription;
+		// 	return "dog";
+		// } else {
+		// 	// return null;
+		// 	return "cat";
+		}
+	}
+	
+	// return post.postmeta[0].meta_value;
 }
 
 function getPostCoverImageId(post) {
@@ -80,7 +226,24 @@ function getPostTitle(post) {
 }
 
 function getPostDate(post) {
-	return luxon.DateTime.fromRFC2822(post.pubDate[0], { zone: 'utc' }).toISODate();
+	// return luxon.DateTime.fromRFC2822(post.pubDate[0], { zone: 'utc' }).toISODate();
+	return luxon.DateTime.fromRFC2822(post.pubDate[0], { zone: 'utc' }).toISO();
+}
+
+function getFileDatePrefix(post) {
+	// console.log(post.meta.date);
+	const dt = luxon.DateTime.fromISO(post.meta.date);
+	// console.log(dt);
+	
+	// const yearMonthDay = post.meta.date.substring(0,10);
+	// const yearMonthDayDashes = luxon.DateTime(dt).toISODate;
+	// console.log(yearMonthDayDashes);
+	
+	slugFragment = dt.toFormat('yyyy-LL-dd') + '---'
+	return slugFragment;
+	
+	// return yearMonthDay + "---";
+
 }
 
 function collectAttachedImages(data) {
@@ -133,7 +296,8 @@ function mergeImagesIntoPosts(images, posts) {
 		if (post) {
 			if (image.id === post.meta.coverImageId) {
 				// save cover image filename to frontmatter
-				post.frontmatter.coverImage = shared.getFilenameFromUrl(image.url);
+				// post.frontmatter.coverImage = shared.getFilenameFromUrl(image.url);
+				post.frontmatter.cover = "/media/" + getFileDatePrefix(post) + post.meta.slug + "/" + shared.getFilenameFromUrl(image.url);
 			}
 			
 			// save (unique) full image URLs for downloading later

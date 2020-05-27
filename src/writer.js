@@ -58,8 +58,20 @@ async function loadMarkdownFilePromise(post) {
 	let output = '---\n';
 	Object.entries(post.frontmatter).forEach(pair => {
 		const key = pair[0];
-		const value = (pair[1] || '').replace(/"/g, '\\"');
-		output += key + ': "' + value + '"\n';
+		let value = null;
+		if (key === "draft") {
+			value = (pair[1] || '').replace(/"/g, '\\"');
+			// If draft key -> do not surround with quotes
+			output += key + ': ' + value + '\n';
+		} else if (key === "tags") {
+			// If tags key -> remove commas between tags
+			value = (pair[1] || '').replace(/,/g, "");
+			output += key + ': ' + value + '\n';
+		} else {
+			value = (pair[1] || '').replace(/"/g, '\\"');
+			output += key + ': "' + value + '"\n';
+		}
+		// output += key + ': "' + value + '"\n';
 	});
 	output += '---\n\n' + post.content + '\n';
 	return output;
@@ -70,7 +82,13 @@ async function writeImageFilesPromise(posts, config) {
 	let delay = 0;
 	const payloads = posts.flatMap(post => {
 		const postPath = getPostPath(post, config);
-		const imagesDir = path.join(path.dirname(postPath), 'images');
+		
+		const dt = luxon.DateTime.fromISO(post.frontmatter.date);
+		let slugFragment = post.meta.slug;
+		slugFragment = dt.toFormat('yyyy-LL-dd') + '---' + slugFragment;
+		const imagesDir = path.join(config.output, 'static/media/' + slugFragment);
+		// const imagesDir = path.join(path.dirname(postPath), 'images');
+
 		return post.meta.imageUrls.map(imageUrl => {
 			const filename = shared.getFilenameFromUrl(imageUrl);
 			const payload = {
@@ -126,16 +144,18 @@ function getPostPath(post, config) {
 	// create slug fragment, possibly date prefixed
 	let slugFragment = post.meta.slug;
 	if (config.prefixDate) {
-		slugFragment = dt.toFormat('yyyy-LL-dd') + '-' + slugFragment;
+		// slugFragment = dt.toFormat('yyyy-LL-dd') + '-' + slugFragment;
+		slugFragment = dt.toFormat('yyyy-LL-dd') + '---' + slugFragment;
 	}
 
 	// use slug fragment as folder or filename as specified
 	if (config.postFolders) {
 		pathSegments.push(slugFragment, 'index.md');
 	} else {
+		// pathSegments.push('/content/posts/', slugFragment + '.md');
 		pathSegments.push(slugFragment + '.md');
 	}
-
+	// console.log(path.join(...pathSegments));
 	return path.join(...pathSegments);
 }
 
